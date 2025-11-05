@@ -268,7 +268,9 @@ class BookScraper:
                 if is_new:
                     logger.info(f"Scraped new book: {book.name}")
                 elif changes:
-                    logger.info(f"Scraped book: {book.name} (changes: {', '.join(changes)})")
+                    logger.info(
+                        f"Scraped book: {book.name} (changes: {', '.join(changes)})"
+                    )
                 else:
                     logger.debug(f"Scraped book: {book.name} (no changes)")
             else:
@@ -313,7 +315,8 @@ class BookScraper:
                 html, current_catalog_url
             )
 
-        logger.info(f"Total books to scrape: {len(all_book_urls)}")
+        total_books = len(all_book_urls)
+        logger.info(f"Total books to scrape: {total_books}")
 
         # Filter out already crawled URLs if resuming
         if resume:
@@ -331,6 +334,17 @@ class BookScraper:
         success_count = sum(
             1 for r in results if r is not None and not isinstance(r, Exception)
         )
-        logger.info(
-            f"Crawl completed: {success_count}/{len(all_book_urls)} books scraped successfully"
-        )
+        if resume and total_books > 0 and len(all_book_urls) == 0:
+            logger.info(
+                f"Crawl completed: All {total_books} books were already crawled, "
+                f"no new books to scrape"
+            )
+        elif resume:
+            logger.info(
+                f"Crawl completed: {success_count}/{len(all_book_urls)} new books scraped "
+                f"(out of {total_books} total books)"
+            )
+        else:
+            logger.info(
+                f"Crawl completed: {success_count}/{len(all_book_urls)} books scraped successfully"
+            )

@@ -1,0 +1,487 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Books Crawler API",
+      "description": "RESTful API for books.toscrape.com crawling and monitoring",
+      "version": "1.0.0"
+    },
+    "paths": {
+      "/books": {
+        "get": {
+          "tags": [
+            "books"
+          ],
+          "summary": "Get Books",
+          "description": "Get books with filtering and pagination.\n\nArgs:\n    category: Book category filter\n    min_price: Minimum price filter\n    max_price: Maximum price filter\n    rating: Rating filter\n    sort_by: Sort field\n    page: Page number\n    limit: Items per page\n    api_key: Verified API key\n\nReturns:\n    Paginated books response",
+          "operationId": "get_books_books_get",
+          "security": [
+            {
+              "APIKeyHeader": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "category",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Filter by category",
+                "title": "Category"
+              },
+              "description": "Filter by category"
+            },
+            {
+              "name": "min_price",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Minimum price",
+                "title": "Min Price"
+              },
+              "description": "Minimum price"
+            },
+            {
+              "name": "max_price",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Maximum price",
+                "title": "Max Price"
+              },
+              "description": "Maximum price"
+            },
+            {
+              "name": "rating",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Filter by rating (One, Two, Three, Four, Five)",
+                "title": "Rating"
+              },
+              "description": "Filter by rating (One, Two, Three, Four, Five)"
+            },
+            {
+              "name": "sort_by",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Sort by: rating, price, reviews",
+                "default": "rating",
+                "title": "Sort By"
+              },
+              "description": "Sort by: rating, price, reviews"
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Page number",
+                "default": 1,
+                "title": "Page"
+              },
+              "description": "Page number"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "maximum": 100,
+                "minimum": 1,
+                "description": "Items per page",
+                "default": 20,
+                "title": "Limit"
+              },
+              "description": "Items per page"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "title": "Response Get Books Books Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/books/{book_id}": {
+        "get": {
+          "tags": [
+            "books"
+          ],
+          "summary": "Get Book",
+          "description": "Get book details by ID.\n\nArgs:\n    book_id: Book MongoDB ID\n    api_key: Verified API key\n\nReturns:\n    Book details",
+          "operationId": "get_book_books__book_id__get",
+          "security": [
+            {
+              "APIKeyHeader": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "book_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Book Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "title": "Response Get Book Books  Book Id  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/changes": {
+        "get": {
+          "tags": [
+            "changes"
+          ],
+          "summary": "Get Changes",
+          "description": "Get recent changes.\n\nArgs:\n    date: Date filter (YYYY-MM-DD)\n    change_type: Change type filter\n    limit: Maximum number of changes\n    api_key: Verified API key\n\nReturns:\n    Changes response",
+          "operationId": "get_changes_changes_get",
+          "security": [
+            {
+              "APIKeyHeader": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "date",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Date in YYYY-MM-DD format",
+                "title": "Date"
+              },
+              "description": "Date in YYYY-MM-DD format"
+            },
+            {
+              "name": "change_type",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Filter by change type",
+                "title": "Change Type"
+              },
+              "description": "Filter by change type"
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "maximum": 200,
+                "minimum": 1,
+                "description": "Maximum number of changes",
+                "default": 50,
+                "title": "Limit"
+              },
+              "description": "Maximum number of changes"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "title": "Response Get Changes Changes Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/auth/api-keys": {
+        "post": {
+          "tags": [
+            "auth"
+          ],
+          "summary": "Create Api Key Route",
+          "description": "Create a new API key and return it.\n\nNote: In production, protect this route with admin auth or IP allowlists.",
+          "operationId": "create_api_key_route_auth_api_keys_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApiKeyRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CreateApiKeyResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/health": {
+        "get": {
+          "summary": "Health Check",
+          "description": "Health check endpoint.",
+          "operationId": "health_check_health_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/": {
+        "get": {
+          "summary": "Root",
+          "description": "Root endpoint.",
+          "operationId": "root__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "CreateApiKeyRequest": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name",
+              "description": "A friendly name for the API key"
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Description",
+              "description": "Optional description"
+            }
+          },
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "title": "CreateApiKeyRequest"
+        },
+        "CreateApiKeyResponse": {
+          "properties": {
+            "api_key": {
+              "type": "string",
+              "title": "Api Key"
+            }
+          },
+          "type": "object",
+          "required": [
+            "api_key"
+          ],
+          "title": "CreateApiKeyResponse"
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        }
+      },
+      "securitySchemes": {
+        "APIKeyHeader": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "X-API-Key"
+        }
+      }
+    }
+  }
+  
