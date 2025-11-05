@@ -95,12 +95,15 @@ class BookStorage:
             source_url: Book source URL
 
         Returns:
-            Book document or None
+            Book document dict with _id as ObjectId or None
         """
         try:
             doc = await BookDoc.find_one(BookDoc.source_url == source_url)
             if doc:
-                return doc.model_dump()
+                # Use model_dump() without JSON mode to preserve ObjectId
+                book_dict = doc.model_dump()
+                book_dict["_id"] = doc.id  # Ensure _id is ObjectId
+                return book_dict
             return None
         except Exception as e:
             logger.error(f"Error getting book by URL {source_url}: {e}")

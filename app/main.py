@@ -12,6 +12,7 @@ from app.api.routes import books, changes
 from app.crawler.scraper import BookScraper
 from app.database.mongodb import MongoDB
 from app.database.schemas import create_indexes
+from app.scheduler.scheduler import CrawlerScheduler
 from app.utils.logger import setup_logger
 
 logger = setup_logger("main")
@@ -22,9 +23,19 @@ async def lifespan(app: FastAPI):
     """Lifespan context manager for startup and shutdown."""
     # Startup
     logger.info("Starting application...")
+    scheduler = None
     try:
         await MongoDB.connect()
         await create_indexes()
+        
+        # Start the scheduler for daily change detection
+        try:
+            scheduler = CrawlerScheduler()
+            scheduler.start()
+            logger.info("Scheduler started successfully")
+        except Exception as scheduler_err:
+            logger.error(f"Failed to start scheduler: {scheduler_err}")
+        
         # Kick off initial crawl on startup (non-blocking)
         try:
             asyncio.create_task(BookScraper().crawl_all(resume=True))
@@ -40,6 +51,8 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     logger.info("Shutting down application...")
+    if scheduler:
+        scheduler.stop()
     await MongoDB.disconnect()
     logger.info("Application shut down")
 

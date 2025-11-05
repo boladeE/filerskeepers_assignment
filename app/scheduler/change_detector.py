@@ -1,9 +1,10 @@
 """Change detection logic for books."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Optional
 
 from bson import ObjectId
+from beanie import PydanticObjectId
 
 from app.crawler.models import Book
 from app.crawler.storage import BookStorage, calculate_content_hash
@@ -39,7 +40,7 @@ async def log_change(
             "old_value": old_value,
             "new_value": new_value,
             "book_url": book_url,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(UTC),
         }
 
         await change_log_collection.insert_one(change_entry)
@@ -56,12 +57,13 @@ class ChangeDetector:
         self.storage = BookStorage()
 
     async def detect_changes(
-        self, new_book: Book
+        self, new_book: Book, store_html: bool = True
     ) -> tuple[bool, Optional[ObjectId], list[str]]:
         """Detect changes between new book data and stored data.
 
         Args:
             new_book: Newly scraped book data
+            store_html: Whether to store raw HTML (default: True for initial crawls)
 
         Returns:
             Tuple of (is_new, book_id, list_of_changes)
@@ -72,7 +74,7 @@ class ChangeDetector:
 
             if not existing_book:
                 # New book
-                book_id = await self.storage.save_book(new_book, store_html=True)
+                book_id = await self.storage.save_book(new_book, store_html=store_html)
                 if book_id:
                     await log_change(
                         book_id,
@@ -85,7 +87,15 @@ class ChangeDetector:
                 return True, book_id, ["new_book"]
 
             # Compare with existing book
-            book_id = existing_book["_id"]
+            # Ensure book_id is an ObjectId
+            book_id_raw = existing_book.get("_id")
+            if isinstance(book_id_raw, str):
+                book_id = ObjectId(book_id_raw)
+            elif isinstance(book_id_raw, PydanticObjectId):
+                book_id = ObjectId(str(book_id_raw))
+            else:
+                book_id = book_id_raw
+            
             changes = []
 
             # Calculate content hash
@@ -162,7 +172,8 @@ class ChangeDetector:
 
                 # Update the book in database
                 if changes:
-                    await self.storage.save_book(new_book, store_html=False)
+                    # Store HTML if this is a scheduled update (for fallback)
+                    await self.storage.save_book(new_book, store_html=store_html)
                     logger.info(f"Updated book {new_book.name}: {', '.join(changes)}")
 
             return False, book_id, changes

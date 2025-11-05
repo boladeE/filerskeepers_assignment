@@ -64,3 +64,43 @@ def test_content_hash():
     
     assert hash1 != hash3
 
+
+def test_book_model_validation():
+    """Test Book model validation."""
+    # Valid book
+    book = Book(
+        name="Test Book",
+        description="Test description",
+        category="Fiction",
+        price_including_tax=10.0,
+        price_excluding_tax=10.0,
+        availability="In stock",
+        number_of_reviews=5,
+        image_url="http://example.com/image.jpg",
+        rating="Four",
+        source_url="http://example.com/book",
+    )
+    assert book.name == "Test Book"
+    assert book.price_including_tax == 10.0
+    
+    # Test default values
+    assert book.status == "active"
+    assert book.number_of_reviews == 5
+
+
+def test_book_model_optional_fields():
+    """Test Book model with optional fields."""
+    book = Book(
+        name="Test Book",
+        category="Fiction",
+        price_including_tax=10.0,
+        price_excluding_tax=10.0,
+        availability="In stock",
+        image_url="http://example.com/image.jpg",
+        source_url="http://example.com/book",
+    )
+    # Optional fields should have defaults
+    assert book.description == ""
+    assert book.number_of_reviews == 0
+    assert book.rating is None
+

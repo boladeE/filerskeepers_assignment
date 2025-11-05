@@ -1,6 +1,6 @@
 """Beanie document models for MongoDB collections."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated, Optional
 
 from beanie import Document, Indexed
@@ -20,11 +20,11 @@ class BookDoc(Document):
     image_url: HttpUrl
     rating: Optional[str] = None
     source_url: Indexed(HttpUrl, unique=True)
-    crawl_timestamp: datetime = datetime.utcnow()
+    crawl_timestamp: datetime = datetime.now(timezone.utc)
     status: str = "active"
     content_hash: Optional[str] = None
     raw_html: Optional[str] = None
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
     class Settings:
         name = "books"
@@ -38,7 +38,7 @@ class ChangeLogDoc(Document):
     old_value: Optional[str] = None
     new_value: Optional[str] = None
     book_url: str
-    timestamp: Indexed(datetime) = datetime.utcnow()
+    timestamp: Indexed(datetime) = datetime.now(timezone.utc)
 
     class Settings:
         name = "change_log"
@@ -51,7 +51,7 @@ class ApiKeyDoc(Document):
     name: str
     description: Optional[str] = None
     is_active: Annotated[bool, Indexed()] = True
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
     last_used: Optional[datetime] = None
 
     class Settings:

@@ -1,6 +1,6 @@
 """APScheduler setup for daily change detection."""
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -31,11 +31,9 @@ class CrawlerScheduler:
 
         try:
             # Scrape all books
+            # Change detection is integrated into the scraper via ChangeDetector
+            # The scraper automatically detects and logs changes during scraping
             await self.scraper.crawl_all(resume=True)
-
-            # Note: Change detection is now integrated into the scraper's save operation
-            # The storage layer saves books, and we detect changes during save
-            # For a standalone scheduler, we would need to re-scrape and compare
 
             # Generate daily report
             try:
@@ -51,7 +49,7 @@ class CrawlerScheduler:
             change_log_collection = db["change_log"]
 
             # Count changes in last 24 hours
-            yesterday = datetime.utcnow() - timedelta(days=1)
+            yesterday = datetime.now(UTC) - timedelta(days=1)
             change_count = await change_log_collection.count_documents(
                 {
                     "timestamp": {"$gte": yesterday},

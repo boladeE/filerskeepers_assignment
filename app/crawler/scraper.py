@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 
 from app.crawler.models import Book
 from app.crawler.storage import BookStorage
+from app.scheduler.change_detector import ChangeDetector
 from app.utils.config import settings
 from app.utils.logger import setup_logger
 
@@ -22,6 +23,7 @@ class BookScraper:
         """Initialize scraper."""
         self.base_url = settings.base_url
         self.storage = BookStorage()
+        self.change_detector = ChangeDetector()
         self.semaphore = asyncio.Semaphore(settings.max_concurrent_requests)
         self.crawled_urls: set[str] = set()
 
@@ -259,10 +261,18 @@ class BookScraper:
         book = self._parse_book_page(html, url)
 
         if book:
-            # Save to database
-            await self.storage.save_book(book, store_html=True)
-            self.crawled_urls.add(url)
-            logger.info(f"Scraped book: {book.name}")
+            # Use ChangeDetector to save book and detect/log changes
+            is_new, book_id, changes = await self.change_detector.detect_changes(book)
+            if book_id:
+                self.crawled_urls.add(url)
+                if is_new:
+                    logger.info(f"Scraped new book: {book.name}")
+                elif changes:
+                    logger.info(f"Scraped book: {book.name} (changes: {', '.join(changes)})")
+                else:
+                    logger.debug(f"Scraped book: {book.name} (no changes)")
+            else:
+                logger.warning(f"Failed to save book: {book.name}")
 
         return book
 

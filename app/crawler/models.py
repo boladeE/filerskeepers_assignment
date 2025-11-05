@@ -1,9 +1,9 @@
 """Pydantic models for book data."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 
 class Book(BaseModel):
@@ -22,7 +22,8 @@ class Book(BaseModel):
     )
     source_url: HttpUrl = Field(..., description="Source URL of the book page")
     crawl_timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="Crawl timestamp"
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Crawl timestamp",
     )
     status: str = Field(default="active", description="Book status")
     content_hash: Optional[str] = Field(
@@ -30,10 +31,8 @@ class Book(BaseModel):
     )
     raw_html: Optional[str] = Field(default=None, description="Raw HTML snapshot")
 
-    class Config:
-        """Pydantic config."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "name": "A Light in the Attic",
                 "description": "It's hard to imagine a world without A Light in the Attic...",
@@ -49,6 +48,7 @@ class Book(BaseModel):
                 "status": "active",
             }
         }
+    )
 
 
 class BookMetadata(BaseModel):

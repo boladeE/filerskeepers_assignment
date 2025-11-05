@@ -2,7 +2,7 @@
 
 import csv
 import json
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -32,7 +32,7 @@ class ReportGenerator:
             Path to generated report file
         """
         if date is None:
-            date = datetime.utcnow() - timedelta(days=1)
+            date = datetime.now(UTC) - timedelta(days=1)
 
         start_date = date.replace(hour=0, minute=0, second=0, microsecond=0)
         end_date = start_date + timedelta(days=1)

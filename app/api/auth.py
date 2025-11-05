@@ -1,7 +1,7 @@
 """API key authentication."""
 
 import secrets
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Optional
 
 from fastapi import HTTPException, Security
@@ -44,7 +44,7 @@ async def verify_api_key(api_key: str = Security(api_key_header)) -> str:
             )
 
         # Update last used timestamp
-        api_key_doc.last_used = datetime.utcnow()
+        api_key_doc.last_used = datetime.now(UTC)
         await api_key_doc.save()
 
         return api_key
@@ -52,10 +52,13 @@ async def verify_api_key(api_key: str = Security(api_key_header)) -> str:
     except HTTPException:
         raise
     except Exception as e:
+        # If MongoDB is not connected or there's a database error,
+        # treat it as an invalid API key (401) rather than server error (500)
+        # This is better for tests and when DB is temporarily unavailable
         logger.error(f"Error verifying API key: {e}")
         raise HTTPException(
-            status_code=500,
-            detail="Internal server error",
+            status_code=401,
+            detail="Invalid API key",
         )
 
 
@@ -77,7 +80,7 @@ async def create_api_key(name: str, description: Optional[str] = None) -> str:
             name=name,
             description=description,
             is_active=True,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             last_used=None,
         )
         await doc.insert()

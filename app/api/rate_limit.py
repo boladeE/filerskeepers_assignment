@@ -1,7 +1,7 @@
 """Rate limiting middleware."""
 
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Optional
 
 from fastapi import HTTPException, Request, status
@@ -44,7 +44,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         Args:
             api_key: API key
         """
-        one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+        one_hour_ago = datetime.now(UTC) - timedelta(hours=1)
         self.requests[api_key] = [
             req_time for req_time in self.requests[api_key] if req_time > one_hour_ago
         ]
@@ -66,7 +66,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if len(self.requests[api_key]) >= self.requests_per_hour:
             return False
 
-        self.requests[api_key].append(datetime.utcnow())
+        self.requests[api_key].append(datetime.now(UTC))
         return True
 
     async def dispatch(self, request: Request, call_next):
