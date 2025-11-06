@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
     # Logging Configuration
     log_level: str = "INFO"
-    log_file: str = "crawler.log"
+    log_file: str = "app.log"
 
     model_config = SettingsConfigDict(
         env_file=".env",

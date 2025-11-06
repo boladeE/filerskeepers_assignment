@@ -94,7 +94,7 @@ SCHEDULER_DAILY_HOUR=2
 
 # Logging Configuration
 LOG_LEVEL=INFO
-LOG_FILE=crawler.log
+LOG_FILE=app.log
 ```
 
 ### 3. Start MongoDB
@@ -338,7 +338,7 @@ pytest --cov=app tests/
 
 Logs are written to:
 - Console (INFO level)
-- File: `crawler.log` (DEBUG level)
+- File: `app.log` (DEBUG level)
 
 Log levels can be configured via `LOG_LEVEL` environment variable.
 
@@ -397,7 +397,7 @@ db.api_keys.find({is_active: true})
 
 Check logs:
 ```bash
-tail -f crawler.log
+tail -f app.log
 ```
 
 ## License
